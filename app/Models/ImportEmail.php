@@ -13,9 +13,16 @@ class ImportEmail implements ToModel
 
     public function model(array $row)
     {
-        return new Email([
-            'email' => $row[0],
-            'id_user'=>$row[1]
-        ]);
+        if ($row[0] !== null){
+            return new Email([
+                'email' => $row[0],
+                'id_user'=>$row[1]
+            ]);
+        }
+//        dd($row[0]);
+//        return new Email([
+//            'email' => $row[0].isNonEmptyString(),
+//            'id_user'=>$row[1]
+//        ]);
     }
 }

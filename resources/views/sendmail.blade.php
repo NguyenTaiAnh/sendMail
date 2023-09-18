@@ -14,23 +14,7 @@
     </script>
 @stop
 @section('body')
-    <!-- Content Header (Page header) -->
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Send Mail</h1>
-                </div><!-- /.col -->
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">Dashboard v2</li>
-                    </ol>
-                </div><!-- /.col -->
-            </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
-    </div>
-    <!-- /.content-header -->
+
 
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
@@ -42,15 +26,17 @@
                     <!-- general form elements -->
                     <div class="card card-primary" style="width: 100%">
                         <div class="card-header">
-                            <h3 class="card-title">Quick Example</h3>
+                            <h3 class="card-title">Send Email</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
+{{--                        <a href="{{{url('tryagain')}}}">Try Again</a>--}}
                         <form enctype="multipart/form-data" role="form" method="post" action="{{route('mail.store')}}" >
                             <input type="hidden" name="_token" value="{{csrf_token()}}">
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="exampleInputFile">File input</label>
+                                    <a href="assets/example/example.xlsx">Download File Example</a>
                                     <input type="file" name="filepath"
                                            class="form-control">
                                 </div>

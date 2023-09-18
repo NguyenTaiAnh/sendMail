@@ -16,4 +16,5 @@ class MailSenders extends Model
         "id_mail",
         "status"
     ];
+
 }

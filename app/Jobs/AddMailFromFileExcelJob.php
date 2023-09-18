@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -35,7 +36,7 @@ class AddMailFromFileExcelJob implements ShouldQueue
     {
         Excel::import(new ImportEmail(), public_path("assets/files/".$this->contentMail->filepath));
         //
-        $getAllMail = Email::all();
+        $getAllMail = Email::where('status', 0)->get();
 
         foreach ($getAllMail as $mail){
             $addMailSender = new MailSenders();
@@ -43,15 +44,20 @@ class AddMailFromFileExcelJob implements ShouldQueue
             $addMailSender->id_content = $this->contentMail->id;
             $addMailSender->id_mail= $mail->id;
             $addMailSender->save();
-            Mail::send('mailfb', array('content'=> $this->contentMail->content), function($message) use ($mail){
-                $message->to($mail->email)->subject('This is test e-mail');
-            });
+            try {
+                $mailSender = str_replace("\u{A0}", '', $mail->email);
+                Mail::send('mailfb', array('content'=> $this->contentMail->content), function($message) use ($mailSender,$mail){
 
+//                    dd(trim($mail->email));
+
+                    $message->to($mailSender)->subject('This is test e-mail');
+                    Email::where('email',$mail->email)->update(['status'=>'1']);
+                });
+            }catch (\Exception $e) {
+                dump($e->getMessage());
+                Log::debug("Mail sent error ". $e->getMessage());
+            }
 
         }
-
-
-
-
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMailContentRequest;
 use App\Http\Requests\UpdateMailContentRequest;
+use App\Jobs\AddMailFromFileExcelJob;
+use App\Jobs\SendMailTryAgain;
 use App\Models\Email;
 use App\Models\ImportEmail;
 use App\Models\MailContent;
@@ -39,19 +41,20 @@ class MailContentController extends Controller
         return redirect()->back()->with('success', 'Success!!!');
     }
 
-    public function store(Request $request)
+    public function store()
     {
-        $addContentMail = new MailContent();
-        $addContentMail->content = $request['content'];
-        if($request->hasFile('filepath')){
-            $file = $request->file('filepath');
-            $name = time().'.'.$file->getClientOriginalExtension();
-            // Thư mục upload
-            $path =public_path() . '/assets/files';
-            // Bắt đầu chuyển file vào thư mục
-            $file->move($path,$name);
-            $addContentMail->filepath =$name;
-        }
+//        $addContentMail = new MailContent();
+//        $addContentMail->content = $request['content'];
+//        if($request->hasFile('filepath')){
+//            $file = $request->file('filepath');
+//            $name = time().'.'.$file->getClientOriginalExtension();
+//            // Thư mục upload
+//            $path =public_path() . '/assets/files';
+//            // Bắt đầu chuyển file vào thư mục
+//            $file->move($path,$name);
+//            $addContentMail->filepath =$name;
+//        }
+        SendMailTryAgain::dispatch();
 //        Excel::import(new ImportEmail(), $request->file('filepath'));
 //        $addContentMail->save();
         return redirect()->route('home')->with('success');
