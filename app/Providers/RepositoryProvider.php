@@ -31,9 +31,16 @@ class RepositoryProvider extends ServiceProvider
     {
 
         $this->app->bind(
-            'App\Repositories\MailSenderService',
+            'App\Repositories\MailSenderRepository',
             function () {
                 $repository = new \App\Repositories\Eloquent\EloquentMailSenderRepository(new \App\Models\MailSenders());
+                return $repository;
+            }
+        );
+        $this->app->bind(
+            'App\Repositories\EmailsRepository',
+            function () {
+                $repository = new \App\Repositories\Eloquent\EloquentEmailsRepository(new \App\Models\Email());
                 return $repository;
             }
         );

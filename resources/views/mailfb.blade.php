@@ -5,5 +5,6 @@
     <title>Confirmation mail</title>
 </head>
 <body>
+<img src='http://localhost/email_open/{{$id_mail}}' style="display: none">
 {!! $content !!}
 </body>

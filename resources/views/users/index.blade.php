@@ -1,6 +1,6 @@
-@extends('admin.main-layout')
+@extends('main')
 
-@section('content-header')
+@section('content')
 <div class="content-header">
   <div class="container-fluid">
     <div class="row mb-2">
@@ -24,7 +24,7 @@
     	<div class="container-fluid">
     		Users List
     	</div>
-    	
+
     </div>
     <!-- /.row (main row) -->
 @endsection

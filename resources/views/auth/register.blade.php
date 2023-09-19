@@ -23,7 +23,12 @@
     <div class="card">
         <div class="card-body register-card-body">
             <p class="login-box-msg">Register a new membership</p>
-
+            @if(session('error'))
+                <div class="text-danger text-center">{{session('error')}}</div>
+            @endif
+            @if(session('success'))
+                <div class="text-success text-center">{{session('success')}}</div>
+            @endif
             <form action="{{route('postRegister')}}" method="post">
                 @csrf
                 <div class="input-group mb-3">
@@ -58,6 +63,7 @@
                         </div>
                     </div>
                 </div>
+                <input type="hidden" class="form-control" name="is_admin" value="1" placeholder="Retype password">
                 <div class="row">
 {{--                    <div class="col-8">--}}
 {{--                        <div class="icheck-primary">--}}

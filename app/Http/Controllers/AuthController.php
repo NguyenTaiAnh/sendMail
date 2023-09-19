@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Session;
 class AuthController extends Controller
 {
     public function getLogin(){
-        return view('auth.login');
+        $user = User::all();
+        $countUser = count($user);
+        return view('auth.login', compact('countUser'));
     }
 
     public function postLogin(Request $request){
@@ -24,7 +26,7 @@ class AuthController extends Controller
         ],$request->password);
 
         if($validated){
-            return redirect()->route('home')->with('success','Login Successfull');
+            return redirect()->route('dashboard')->with('success','Login Successfull');
         }else{
             return redirect()->back()->with('error','Invalid credentials');
         }
@@ -40,12 +42,24 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required'
         ]);
+        $checkAccount = User::where('email',request()->email)->first();
+//        dump($checkAccount);
+//        dd(request()->email);
+//        $checkAccount = User::where()
+        if (!$checkAccount){
+            $user = User::create(request(['name', 'email', 'password','is_admin']));
+            auth()->login($user);
 
-        $user = User::create(request(['name', 'email', 'password']));
+            return redirect()->to('/');
+        }
+        else{
+            Session::put('error', 'Account already exists');
 
-        auth()->login($user);
+            return redirect()->to('/register');
 
-        return redirect()->to('/');
+        }
+
+
     }
 
     public function logout()

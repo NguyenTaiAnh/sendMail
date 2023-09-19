@@ -57,7 +57,7 @@ class MailContentController extends Controller
         SendMailTryAgain::dispatch();
 //        Excel::import(new ImportEmail(), $request->file('filepath'));
 //        $addContentMail->save();
-        return redirect()->route('home')->with('success');
+        return redirect()->route('sendmail')->with('success');
     }
 
     /**

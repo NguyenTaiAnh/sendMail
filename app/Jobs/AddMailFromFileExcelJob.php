@@ -14,6 +14,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Http;
 
 class AddMailFromFileExcelJob implements ShouldQueue
 {
@@ -46,16 +47,37 @@ class AddMailFromFileExcelJob implements ShouldQueue
             $addMailSender->save();
             try {
                 $mailSender = str_replace("\u{A0}", '', $mail->email);
-                Mail::send('mailfb', array('content'=> $this->contentMail->content), function($message) use ($mailSender,$mail){
+                Mail::send('mailfb', array('content'=> $this->contentMail->content, 'id_mail'=> $mail->id), function($message) use ($mailSender,$mail){
+                    try{
+                        $key = env('API_KEY_HUNTER_EMAIL');
+                        $response = Http::get("https://api.hunter.io/v2/email-verifier?email=$mailSender&api_key=$key");
+                        $data = $response->json();
 
-//                    dd(trim($mail->email));
+                        if(count($data) > 1){
+                            if ( $data['data'] && $data['data']['status'] == 'valid') {
+                                // Địa chỉ email hợp lệ, bạn có thể gửi email
+                                // ...
+//                                echo "Địa chỉ email hợp lệ, bạn có thể gửi email";
+                                $message->to($mailSender)->subject('This is test e-mail');
+                                Log::info("Send mail success: ". $mailSender);
+                                Email::where('email',$mail->email)->update(['status'=>Email::SUCCESS]);
+                            }
+                        }else{
+                            if ($data['errors'] && $data['errors'][0]['id'] == 'invalid_email'){
+                                echo $data['errors'][0]['details'];
+                                Log::info("Mail error  01". $data['errors'][0]['details']);
+                                Email::where('email',$mail->email)->update(['status'=>Email::ERROR]);
+                            }
+                        }
+                    }catch(\Exception $e){
+                        Email::where('email',$mail->email)->update(['status'=>Email::FAILED]);
+                        Log::debug("Mail sent error 1 ". $e->getMessage());
+                    }
 
-                    $message->to($mailSender)->subject('This is test e-mail');
-                    Email::where('email',$mail->email)->update(['status'=>'1']);
                 });
             }catch (\Exception $e) {
-                dump($e->getMessage());
-                Log::debug("Mail sent error ". $e->getMessage());
+                Email::where('email',$mail->email)->update(['status'=>Email::FAILED]);
+                Log::debug("Mail sent error 2 ". $e->getMessage());
             }
 
         }

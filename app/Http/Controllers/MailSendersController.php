@@ -54,7 +54,7 @@ class MailSendersController extends Controller
         $addContentMail->save();
         AddMailFromFileExcelJob::dispatch($addContentMail);
 
-        return redirect()->route('home')->with('success');
+        return redirect()->route('sendmail')->with('success');
     }
 
     /**

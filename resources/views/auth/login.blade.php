@@ -69,7 +69,8 @@
             <button type="submit" class="btn btn-primary btn-block">Sign In</button>
           </div>
 
-            <p class="mb-0">
+
+            <p class="mb-0" style=" display: {{$countUser > 0 ? 'none' : 'block'}}">
                 <a href="{{url('register')}}" class="text-center">Register a new membership</a>
             </p>
           <!-- /.col -->
