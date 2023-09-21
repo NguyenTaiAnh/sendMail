@@ -6,6 +6,7 @@ use App\Http\Requests\StoreEmailRequest;
 use App\Http\Requests\UpdateEmailRequest;
 use App\Models\Email;
 use App\Repositories\EmailsRepository;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
@@ -44,6 +45,7 @@ class EmailController extends Controller
 
 
     public function datatable(){
+
         $email = $this->emailsRepository->getEmails();
         //   const SUCCESS = '1';
         //    const WAITING = '0';
@@ -73,7 +75,8 @@ class EmailController extends Controller
                 };
             })
             ->editColumn('created_at', function ($time) {
-                return date('Y-m-d H:i:s', strtotime($time->created_at));
+//                dd($parseNow = date('Y-m-d', strtotime($time->created_at)) + env('TIMEZONE_VALUE','+7') * 3600);
+                return date('Y-m-d H:i:s', strtotime($time->created_at)+ env('TIMEZONE_VALUE','+7') * 3600);
             })
             ->editColumn('updated_at', function ($time) {
                 return date('Y-m-d H:i:s', strtotime($time->updated_at));
