@@ -23,6 +23,7 @@
                     {data:'email', searchable: true},
                     {data:'status', searchable:false},
                     {data:'opened', searchable:false},
+                    {data:'note', searchable:false},
                     {data:'created_at', searchable:false},
                     // {data:'action', searchable:false},
                 ]
@@ -85,6 +86,7 @@
                                     <th>Emails</th>
                                     <th>Status</th>
                                     <th>Opened</th>
+                                    <th>Note</th>
                                     <th>CreateAt</th>
                                 </tr>
                                 </thead>

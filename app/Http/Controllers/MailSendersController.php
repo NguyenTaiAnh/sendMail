@@ -41,6 +41,7 @@ class MailSendersController extends Controller
 
         $addContentMail = new MailContent();
         $addContentMail->content = $request['content'];
+        $addContentMail->subject = $request['subject'];
         if($request->hasFile('filepath')){
 //            Excel::import(new ImportEmail(), $request->file('filepath'));
             $file = $request->file('filepath');

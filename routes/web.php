@@ -80,34 +80,5 @@ Route::group(['middleware'=>['admin_auth']],function(){
 //
 //})->name('sendmail');
 Route::get("/test",function (){
-    try {
-        $email = 'a1c4b3@gmail.cpm';
-        $response = Http::get("https://api.hunter.io/v2/email-verifier?email=$email&api_key=6659f3012875ee8718ec1f291f27756defc2f977");
-        $data = $response->json();
-        dump($data);
-
-        if(count($data) > 1){
-            if ( $data['data'] && $data['data']['status'] == 'valid') {
-                // Địa chỉ email hợp lệ, bạn có thể gửi email
-                // ...
-                echo "Địa chỉ email hợp lệ, bạn có thể gửi email";
-            }
-            else {
-                echo "Địa chỉ email không hợp lệ";
-                // Địa chỉ email không hợp lệ
-                // ...
-            }
-        }else{
-            if ($data['errors'] && $data['errors'][0]['id'] == 'invalid_email'){
-                echo $data['errors'][0]['details'];
-            }
-        }
-
-
-
-
-
-    } catch (\Exception $e) {
-        dump($e->getMessage());
-    }
+    dd(1);
 });

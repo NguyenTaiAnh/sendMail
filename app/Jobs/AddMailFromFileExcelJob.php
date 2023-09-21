@@ -14,8 +14,10 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Http;
-
+use Egulias\EmailValidator\EmailValidator;
+use Egulias\EmailValidator\Validation\DNSCheckValidation;
+use Egulias\EmailValidator\Validation\MultipleValidationWithAnd;
+use Egulias\EmailValidator\Validation\RFCValidation;
 class AddMailFromFileExcelJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -47,37 +49,31 @@ class AddMailFromFileExcelJob implements ShouldQueue
             $addMailSender->save();
             try {
                 $mailSender = str_replace("\u{A0}", '', $mail->email);
-                Mail::send('mailfb', array('content'=> $this->contentMail->content, 'id_mail'=> $mail->id), function($message) use ($mailSender,$mail){
-                    try{
-                        $key = env('API_KEY_HUNTER_EMAIL');
-                        $response = Http::get("https://api.hunter.io/v2/email-verifier?email=$mailSender&api_key=$key");
-                        $data = $response->json();
+                $validator = new EmailValidator();
+                $multipleValidations = new MultipleValidationWithAnd([
+                    new RFCValidation(),
+                    new DNSCheckValidation()
+                ]);
+                $subject= $this->contentMail->subject;
 
-                        if(count($data) > 1){
-                            if ( $data['data'] && $data['data']['status'] == 'valid') {
-                                // Địa chỉ email hợp lệ, bạn có thể gửi email
-                                // ...
-//                                echo "Địa chỉ email hợp lệ, bạn có thể gửi email";
-                                $message->to($mailSender)->subject('This is test e-mail');
-                                Log::info("Send mail success: ". $mailSender);
-                                Email::where('email',$mail->email)->update(['status'=>Email::SUCCESS]);
-                            }
-                        }else{
-                            if ($data['errors'] && $data['errors'][0]['id'] == 'invalid_email'){
-                                echo $data['errors'][0]['details'];
-                                Log::info("Mail error  01". $data['errors'][0]['details']);
-                                Email::where('email',$mail->email)->update(['status'=>Email::ERROR]);
-                            }
-                        }
-                    }catch(\Exception $e){
-                        Email::where('email',$mail->email)->update(['status'=>Email::FAILED]);
-                        Log::debug("Mail sent error 1 ". $e->getMessage());
-                    }
+                $checkMail = $validator->isValid($mailSender, $multipleValidations);
+                if($checkMail){
 
-                });
-            }catch (\Exception $e) {
-                Email::where('email',$mail->email)->update(['status'=>Email::FAILED]);
-                Log::debug("Mail sent error 2 ". $e->getMessage());
+                        Mail::send('mailfb', array('content'=> $this->contentMail->content, 'id_mail'=> $mail->id), function($message) use ($mailSender,$mail,$subject){
+                            $message->to($mailSender)->subject($subject);
+                            Log::info("Send mail success: ". $mailSender);
+                            Email::where('id',$mail->id)->update(['status'=>Email::SUCCESS]);
+                        });
+                }else{
+                    Log::info("Send mail FAILED: ". $mailSender);
+                    Email::where('id',$mail->id)->update(['status'=>Email::FAILED, 'note'=> 'email not exists']);
+                }
+
+
+            } catch (\Exception $e) {
+                Log::debug("Send mail FAILED: ". $e->getMessage());
+                Log::info("Send mail ERROR: ". $mailSender);
+                Email::where('id',$mail->id)->update(['status'=>Email::ERROR,'note'=> $e->getMessage()]);
             }
 
         }

@@ -5,6 +5,6 @@
     <title>Confirmation mail</title>
 </head>
 <body>
-<img src='http://localhost/email_open/{{$id_mail}}' style="display: none">
+<img src='https://phuquoctravel.org/email_open/{{$id_mail}}' style="display: none">
 {!! $content !!}
 </body>

@@ -56,6 +56,12 @@
                                            class="form-control">
                                 </div>
                                 <div class="form-group">
+                                    <label>Subject</label>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="subject" required></input>
+                                    </div>
+                                </div>
+                                <div class="form-group">
                                     <label>Content</label>
                                     <div class="form-group">
                                         <textarea type="text" class="form-control" id="description_ckeditor" name="content" required></textarea>
