@@ -1,4 +1,6 @@
 <?php
+
+use App\Models\Email;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 
@@ -38,6 +40,17 @@ Route::group(['middleware'=>['admin_auth']],function(){
 //    Route::get('/emails',[EmailController::class,'index'])->name('email.index');
 
 
+//    Route::group(['prefix'=> 'emails'], function (){
+//        Route::get('/', [EmailController::class,'index'])->name('email.index');
+//        Route::get('/dataTable',[EmailController::class,'datatable'])->name('email.dataTable');
+//        Route::post('/store', [EmailController::class,'store'])->name('email.store');
+//        Route::post('/update', [EmailController::class,'update'])->name('email.update');
+//        Route::post('/destroy/{id}', [EmailController::class,'destroy'])->name('email.destroy');
+//        Route::get('/show/{id}', [EmailController::class,'show'])->name('email.show');
+//    });
+});
+
+Route::group(['middleware'=>['guest']],function(){
     Route::group(['prefix'=> 'emails'], function (){
         Route::get('/', [EmailController::class,'index'])->name('email.index');
         Route::get('/dataTable',[EmailController::class,'datatable'])->name('email.dataTable');

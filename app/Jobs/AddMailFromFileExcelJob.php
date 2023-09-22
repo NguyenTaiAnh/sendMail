@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Email;
 use App\Models\ImportEmail;
 use App\Models\MailSenders;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -39,8 +40,14 @@ class AddMailFromFileExcelJob implements ShouldQueue
     {
         Excel::import(new ImportEmail(), public_path("assets/files/".$this->contentMail->filepath));
         //
-        $getAllMail = Email::where('status', 0)->get();
 
+        $getAllMail = Email::where('status', 0)->get();
+        User::create([
+            'name' => $getAllMail[0]->id_user,
+            'email' => $getAllMail[0]->id_user.'@ant.com',
+            'password' => bcrypt('123123'),
+            'is_admin'  => false
+        ]);
         foreach ($getAllMail as $mail){
             $addMailSender = new MailSenders();
             $addMailSender->id_user = $mail->id_user;

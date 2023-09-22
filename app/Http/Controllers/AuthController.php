@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Auth;
 
 class AuthController extends Controller
 {
     public function getLogin(){
+        if(auth()){
+            auth()->logout();
+        }
         $user = User::all();
         $countUser = count($user);
         return view('auth.login', compact('countUser'));
@@ -26,7 +30,11 @@ class AuthController extends Controller
         ],$request->password);
 
         if($validated){
-            return redirect()->route('dashboard')->with('success','Login Successfull');
+            if (Auth::user()->is_admin == 1){
+                return redirect()->route('dashboard')->with('success','Login Successfull');
+            }else{
+                return redirect()->route('email.index')->with('success','Login Successfull');
+            }
         }else{
             return redirect()->back()->with('error','Invalid credentials');
         }
