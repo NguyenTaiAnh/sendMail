@@ -53,13 +53,6 @@ class AddMailFromFileExcelJob implements ShouldQueue
             'password_user'=> $pass,
             'is_admin'  => false
         ]);
-        User::create([
-            'name' => $getAllMail[0]->id_user,
-            'email' => $getAllMail[0]->id_user.'@ant.com',
-            'password' => Hash::make($pass),
-            'password_user'=> $pass,
-            'is_admin'  => false
-        ]);
         Email::where('status', 0)->chunkById(2, function ($mails) {
             foreach ($mails as $mail) {
                 Log::info("Begin sending mail: " .$mail);
