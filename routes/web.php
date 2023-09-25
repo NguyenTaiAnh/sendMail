@@ -29,7 +29,7 @@ Route::get('email_open/{id}',[EmailController::class,'emailOpen'])->name('email.
 Route::group(['middleware'=>['admin_auth']],function(){
 
     Route::get('/',[ProfileController::class,'dashboard'])->name('dashboard');
-    Route::get('users',[UserController::class,'index'])->name('users.index');
+//    Route::get('users',[UserController::class,'index'])->name('users.index');
     Route::get('/sendmail', function () {
         return view('sendmail');
     })->name('sendmail');
@@ -38,7 +38,14 @@ Route::group(['middleware'=>['admin_auth']],function(){
     Route::post('/store', [MailSendersController::class,'store'])->name('mail.store');
 
 //    Route::get('/emails',[EmailController::class,'index'])->name('email.index');
-
+    Route::group(['prefix'=> 'users'], function (){
+        Route::get('/', [UserController::class,'index'])->name('users.index');
+        Route::get('/dataTable',[UserController::class,'datatable'])->name('users.dataTable');
+        Route::post('/store', [UserController::class,'store'])->name('users.store');
+        Route::post('/update', [UserController::class,'update'])->name('users.update');
+        Route::post('/destroy/{id}', [UserController::class,'destroy'])->name('users.destroy');
+        Route::get('/show/{id}', [UserController::class,'show'])->name('users.show');
+    });
 
 //    Route::group(['prefix'=> 'emails'], function (){
 //        Route::get('/', [EmailController::class,'index'])->name('email.index');

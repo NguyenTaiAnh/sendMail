@@ -12,8 +12,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Egulias\EmailValidator\EmailValidator;
 use Egulias\EmailValidator\Validation\DNSCheckValidation;
@@ -41,48 +43,61 @@ class AddMailFromFileExcelJob implements ShouldQueue
         Excel::import(new ImportEmail(), public_path("assets/files/".$this->contentMail->filepath));
         //
 
+        $pass = Str::random(8);
+//        $pass = Hash::make(Str::random(8));
         $getAllMail = Email::where('status', 0)->get();
-        User::create([
+        User::firstOrCreate(['name' => $getAllMail[0]->id_user], [
             'name' => $getAllMail[0]->id_user,
             'email' => $getAllMail[0]->id_user.'@ant.com',
-            'password' => bcrypt('123123'),
+            'password' => bcrypt($pass),
+            'password_user'=> $pass,
             'is_admin'  => false
         ]);
-        foreach ($getAllMail as $mail){
-            $addMailSender = new MailSenders();
-            $addMailSender->id_user = $mail->id_user;
-            $addMailSender->id_content = $this->contentMail->id;
-            $addMailSender->id_mail= $mail->id;
-            $addMailSender->save();
-            try {
-                $mailSender = str_replace("\u{A0}", '', $mail->email);
-                $validator = new EmailValidator();
-                $multipleValidations = new MultipleValidationWithAnd([
-                    new RFCValidation(),
-                    new DNSCheckValidation()
-                ]);
-                $subject= $this->contentMail->subject;
+//        User::create([
+//            'name' => $getAllMail[0]->id_user,
+//            'email' => $getAllMail[0]->id_user.'@ant.com',
+//            'password' => Hash::make($pass),
+//            'password_user'=> $pass,
+//            'is_admin'  => false
+//        ]);
+        Email::where('status', 0)->chunkById(2, function ($mails) {
+            foreach ($mails as $mail) {
+                Log::info("Begin sending mail: " .$mail);
+                $addMailSender = new MailSenders();
+                $addMailSender->id_user = $mail->id_user;
+                $addMailSender->id_content = $this->contentMail->id;
+                $addMailSender->id_mail = $mail->id;
+                $addMailSender->save();
 
-                $checkMail = $validator->isValid($mailSender, $multipleValidations);
-                if($checkMail){
+                try {
+                    $mailSender = str_replace("\u{A0}", '', $mail->email);
+                    Log::info("sending mail");
+                    $validator = new EmailValidator();
+                    $multipleValidations = new MultipleValidationWithAnd([
+                        new RFCValidation(),
+                        new DNSCheckValidation()
+                    ]);
+                    $subject = $this->contentMail->subject;
 
-                        Mail::send('mailfb', array('content'=> $this->contentMail->content, 'id_mail'=> $mail->id), function($message) use ($mailSender,$mail,$subject){
+                    $checkMail = $validator->isValid($mailSender, $multipleValidations);
+
+                    if ($checkMail) {
+                        Mail::send('mailfb', array('content' => $this->contentMail->content, 'id_mail' => $mail->id), function ($message) use ($mailSender, $mail, $subject) {
                             $message->to($mailSender)->subject($subject);
-                            Log::info("Send mail success: ". $mailSender);
-                            Email::where('id',$mail->id)->update(['status'=>Email::SUCCESS]);
+                            Log::info("Send mail success: " . $mailSender);
+                            Email::where('id', $mail->id)->update(['status' => Email::SUCCESS]);
                         });
-                }else{
-                    Log::info("Send mail FAILED: ". $mailSender);
-                    Email::where('id',$mail->id)->update(['status'=>Email::FAILED, 'note'=> 'email not exists']);
+                    } else {
+                        Log::info("Send mail FAILED: " . $mailSender);
+                        Email::where('id', $mail->id)->update(['status' => Email::FAILED, 'note' => 'email not exists']);
+                    }
+                } catch (\Exception $e) {
+                    Log::debug("Send mail FAILED: " . $e->getMessage());
+                    Log::info("Send mail ERROR: " . $mailSender);
+                    Email::where('id', $mail->id)->update(['status' => Email::ERROR, 'note' => $e->getMessage()]);
                 }
-
-
-            } catch (\Exception $e) {
-                Log::debug("Send mail FAILED: ". $e->getMessage());
-                Log::info("Send mail ERROR: ". $mailSender);
-                Email::where('id',$mail->id)->update(['status'=>Email::ERROR,'note'=> $e->getMessage()]);
             }
+        },'id');
 
-        }
     }
 }

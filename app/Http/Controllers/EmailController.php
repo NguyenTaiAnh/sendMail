@@ -8,6 +8,7 @@ use App\Models\Email;
 use App\Repositories\EmailsRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
@@ -26,6 +27,7 @@ class EmailController extends Controller
     public function __construct(EmailsRepository $emailsRepository, DataTables $dataTable){
         $this->emailsRepository = $emailsRepository;
         $this->dataTable = $dataTable;
+        $this->middleware("guest");
     }
     /**
      * Display a listing of the resource.
@@ -46,11 +48,21 @@ class EmailController extends Controller
 
     public function datatable(){
 
-        $email = $this->emailsRepository->getEmails();
-        //   const SUCCESS = '1';
-        //    const WAITING = '0';
-        //    const FAILED = '2';
-        //    const ERROR = '3';
+//        $email = $this->emailsRepository->getEmails();
+//        dd($email->email);
+//        //   const SUCCESS = '1';
+//        //    const WAITING = '0';
+//        //    const FAILED = '2';
+//        //    const ERROR = '3';
+//        if ($email){
+//
+//        }
+        $email= null;
+        if (auth()->user()->is_admin){
+            $email = $this->emailsRepository->getEmails();
+        }else{
+            $email = Email::where('id_user', auth()->user()->name);
+        }
         return $this->dataTable->eloquent($email)
             ->editColumn('status', function ($email){
                 switch ($email->status){

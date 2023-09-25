@@ -44,5 +44,13 @@ class RepositoryProvider extends ServiceProvider
                 return $repository;
             }
         );
+
+        $this->app->bind(
+            'App\Repositories\UsersRepository',
+            function () {
+                $repository = new \App\Repositories\Eloquent\EloquentUsersRepository(new \App\Models\User());
+                return $repository;
+            }
+        );
     }
 }
